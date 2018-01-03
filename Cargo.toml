@@ -1,0 +1,12 @@
+[package]
+name = "isometric"
+version = "0.1.0"
+authors = ["zelda"]
+
+[features]
+# If this feature is enabled, it will add <cargo root dir>/resources/ to
+# the resource search path.
+cargo-resource-root = []
+
+[dependencies]
+ggez = { git = "https://github.com/ggez/ggez.git" }
