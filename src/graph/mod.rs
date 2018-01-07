@@ -1,8 +1,10 @@
 // Based on https://www.redblobgames.com/pathfinding/a-star/implementation.html
 
 use std::collections::VecDeque;
-use std::collections::HashMap;
-use std::collections::HashSet;
+use std::collections::{
+    HashMap,
+    HashSet,
+};
 use std::ops::Sub;
 
 #[derive(Debug, PartialEq)]
@@ -20,15 +22,15 @@ impl Graph {
         let mut frontier: Queue<char> = Queue{ elements: VecDeque::new()};
         frontier.put(start);
         let mut visited: HashSet<char> = HashSet::new();
-        &mut visited.insert(start);
+        visited.insert(start);
 
         while !&frontier.empty() {
             let current = &frontier.get().unwrap();
             println!("Visiting {}", current);
             for next in self.neighbors(*current).unwrap() {
-                if !visited.contains(&next) {
-                    &mut frontier.put(next.clone());
-                    &mut visited.insert(*next);
+                if !visited.contains(next) {
+                    visited.insert(*next);
+                    frontier.put(next.clone());
                 }
             }
         }
@@ -83,7 +85,7 @@ impl SquareGrid {
 
         let pre_check_results = vec![n1, n2, n3, n4];
         pre_check_results.iter()
-                         .map(|n| *n)
+                         .cloned()
                          .filter(|n| self.in_bounds(n))
                          .filter(|n| self.passable(n))
                          .collect()
@@ -94,14 +96,14 @@ impl SquareGrid {
         frontier.put(start);
 
         let mut came_from: HashMap<Point, Point> = HashMap::new();
-        &mut came_from.insert(start, start);
+        came_from.insert(start, start);
 
         while !&frontier.empty() {
             let current = &frontier.get().unwrap();
             for next in self.neighbors(current) {
                 if !came_from.contains_key(&next) {
-                    &mut frontier.put(next.clone());
-                    &mut came_from.insert(next, *current);
+                    frontier.put(next);
+                    came_from.insert(next, *current);
                 }
             }
         }
@@ -113,19 +115,15 @@ impl SquareGrid {
             let mut row = String::new();
             for x in 0..self.width {
                 let current_point = Point{x: x as isize, y: y as isize};
-                let mut next_node_str = String::new();
+                let mut next_node_str: String;
                 if !self.walls.contains(&current_point) {
                     next_node_str = match parents.get(&current_point) {
                         Some(parent) => direction_of_neighbour(current_point, *parent),
                         None => String::from(".")
                     };
-                    while next_node_str.len() < width {
-                        next_node_str.push(' ');
-                    }
+                    next_node_str = center_pad(width, &next_node_str, ' ');
                 } else {
-                    while next_node_str.len() < width {
-                        next_node_str.push('#');
-                    }
+                    next_node_str = center_pad(width, &String::from("#"), '#');
                 }
                 row.push_str(&next_node_str)
             }
@@ -142,7 +140,7 @@ struct Queue<T> {
 
 impl <T> Queue<T> {
     pub fn empty(&self)-> bool {
-        self.elements.len() == 0
+        self.elements.is_empty()
     }
 
     pub fn put(&mut self, x: T) {
@@ -163,6 +161,19 @@ pub fn direction_of_neighbour(from_point: Point, to_point: Point)-> String {
         Point{x:  0, y:  1} => String::from("^"),
         _ => String::from("."),
     }
+}
+
+pub fn center_pad(width: usize, from_str: &str, pad_char: char)-> String {
+    let mut result = String::new();
+    result.push_str(from_str);
+    let pad = pad_char.to_string();
+    while result.len() < width {
+        result = result + &pad;
+        if result.len() < width {
+            result = pad.to_string() + &result;
+        }
+    };
+    result
 }
 
 #[cfg(test)]
@@ -195,5 +206,19 @@ mod tests {
         assert_eq!(String::from("^"), direction_of_neighbour(test_point1, test_point3));
         assert_eq!(String::from(">"), direction_of_neighbour(test_point1, test_point4));
         assert_eq!(String::from("<"), direction_of_neighbour(test_point1, test_point5));
+    }
+
+    #[test]
+    fn center_pad_works() {
+        let pad_char = ' ';
+        let from_str1 = String::from("X");
+        let from_str2 = String::from("XX");
+        let expected1 = String::from(" X ");
+        let expected2 = String::from("  X  ");
+        let expected3 = String::from(" XX  ");
+
+        assert_eq!(expected1, center_pad(3, &from_str1, pad_char));
+        assert_eq!(expected2, center_pad(5, &from_str1, pad_char));
+        assert_eq!(expected3, center_pad(5, &from_str2, pad_char));
     }
 }
