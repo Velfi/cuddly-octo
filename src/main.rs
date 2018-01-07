@@ -138,14 +138,12 @@ pub fn main() {
 
     build_debug_grid_walls(&mut example_grid);
 
-    let parents = example_grid.breadth_first_search_2(graph::Point{x: 8, y: 7});
+    let parents = example_grid.breadth_first_search_2(graph::Point{x: 16, y: 7});
     // draw_grid(g, width=2, point_to=parents, start=(8, 7))
     example_grid.draw_grid(2, &parents);
 }
 
 fn build_debug_grid_walls(graph: &mut graph::SquareGrid) {
-    graph.walls.insert(graph::Point{x: 6, y: 0});
-    graph.walls.insert(graph::Point{x: 6, y: 1});
     graph.walls.insert(graph::Point{x: 6, y: 2});
     graph.walls.insert(graph::Point{x: 6, y: 3});
     graph.walls.insert(graph::Point{x: 6, y: 4});
@@ -165,11 +163,7 @@ fn build_debug_grid_walls(graph: &mut graph::SquareGrid) {
     graph.walls.insert(graph::Point{x: 14, y: 11});
     graph.walls.insert(graph::Point{x: 14, y: 12});
     graph.walls.insert(graph::Point{x: 14, y: 13});
-    graph.walls.insert(graph::Point{x: 14, y: 14});
-    graph.walls.insert(graph::Point{x: 14, y: 15});
 
-    graph.walls.insert(graph::Point{x: 22, y: 0});
-    graph.walls.insert(graph::Point{x: 22, y: 1});
     graph.walls.insert(graph::Point{x: 22, y: 2});
     graph.walls.insert(graph::Point{x: 22, y: 3});
     graph.walls.insert(graph::Point{x: 22, y: 4});

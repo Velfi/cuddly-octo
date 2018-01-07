@@ -113,33 +113,21 @@ impl SquareGrid {
             let mut row = String::new();
             for x in 0..self.width {
                 let current_point = Point{x: x as isize, y: y as isize};
-                match width {
-                    2 => {
-                        match self.walls.contains(&current_point) {
-                            true => row.push_str("##"),
-                            false => match parents.get(&current_point) {
-                                Some(parent) => {
-                                    let mut direction = direction_of_neighbour(current_point, *parent);
-                                    direction.push(' ');
-                                    row.push_str(&direction)
-                                },
-                                None => row.push_str(". ")
-                            },
-                        }
-                    },
-                    3 => {
-                        match self.walls.contains(&current_point) {
-                            true => row.push_str("###"),
-                            false => row.push_str(".  "),
-                        }
-                    },
-                    _ => {
-                        match self.walls.contains(&current_point) {
-                            true => row.push_str("#"),
-                            false => row.push_str("."),
-                        }
-                    },
-                };
+                let mut next_node_str = String::new();
+                if !self.walls.contains(&current_point) {
+                    next_node_str = match parents.get(&current_point) {
+                        Some(parent) => direction_of_neighbour(current_point, *parent),
+                        None => String::from(".")
+                    };
+                    while next_node_str.len() < width {
+                        next_node_str.push(' ');
+                    }
+                } else {
+                    while next_node_str.len() < width {
+                        next_node_str.push('#');
+                    }
+                }
+                row.push_str(&next_node_str)
             }
             println!("{}", row);
         }
