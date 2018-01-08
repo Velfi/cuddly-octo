@@ -54,6 +54,7 @@ impl Sub for Point {
     }
 }
 
+
 pub struct SquareGrid {
     pub width: usize,
     pub height: usize,
@@ -88,7 +89,7 @@ impl SquareGrid {
                          .cloned()
                          .filter(|n| self.in_bounds(n))
                          .filter(|n| self.passable(n))
-                         .collect()
+                         .collect::<Vec<Point>>()
     }
 
     pub fn breadth_first_search_2(&self, start: Point)-> HashMap<Point, Point> {
@@ -110,13 +111,38 @@ impl SquareGrid {
         came_from
     }
 
-    pub fn draw_grid(&self, width: usize, parents: &HashMap<Point, Point>) {
+    pub fn breadth_first_search_3(&self, start: Point, goal: Point)-> HashMap<Point, Point> {
+        let mut frontier: Queue<Point> = Queue{ elements: VecDeque::new()};
+        frontier.put(start);
+
+        let mut came_from: HashMap<Point, Point> = HashMap::new();
+        came_from.insert(start, start);
+
+        while !frontier.empty() {
+            let current = frontier.get().unwrap();
+            if current == goal {
+                frontier = Queue{ elements: VecDeque::new()};
+            } else {
+                for next in self.neighbors(&current) {
+                    if !came_from.contains_key(&next) {
+                        frontier.put(next);
+                        came_from.insert(next, current);
+                    }
+                }
+            }
+        }
+        came_from
+    }
+
+    pub fn draw_grid(&self, width: usize, parents: &HashMap<Point, Point>, goal: Point) {
         for y in 0..self.height {
             let mut row = String::new();
             for x in 0..self.width {
                 let current_point = Point{x: x as isize, y: y as isize};
                 let mut next_node_str: String;
-                if !self.walls.contains(&current_point) {
+                if current_point == goal {
+                    next_node_str = center_pad(width, &String::from("G"), ' ');
+                } else if !self.walls.contains(&current_point) {
                     next_node_str = match parents.get(&current_point) {
                         Some(parent) => direction_of_neighbour(current_point, *parent),
                         None => String::from(".")
@@ -131,6 +157,17 @@ impl SquareGrid {
         }
     }
 
+}
+
+struct GridWithWeights {
+    grid: SquareGrid,
+    weights: HashMap<_, _>,
+}
+
+impl GridWithWeights {
+    pub fn cost(&self, from_node: isize, to_node: isize) {
+
+    }
 }
 
 #[derive(Debug, PartialEq)]
@@ -159,6 +196,7 @@ pub fn direction_of_neighbour(from_point: Point, to_point: Point)-> String {
         Point{x:  1, y:  0} => String::from("<"),
         Point{x:  0, y: -1} => String::from("v"),
         Point{x:  0, y:  1} => String::from("^"),
+        Point{x:  0, y:  0} => String::from("S"),
         _ => String::from("."),
     }
 }
@@ -200,12 +238,14 @@ mod tests {
         let test_point3 = Point{x: 5, y: 4};
         let test_point4 = Point{x: 6, y: 5};
         let test_point5 = Point{x: 4, y: 5};
+        let test_point6 = Point{x: 0, y: 0};
 
-        assert_eq!(String::from("."), direction_of_neighbour(test_point1, test_point1));
+        assert_eq!(String::from("S"), direction_of_neighbour(test_point1, test_point1));
         assert_eq!(String::from("v"), direction_of_neighbour(test_point1, test_point2));
         assert_eq!(String::from("^"), direction_of_neighbour(test_point1, test_point3));
         assert_eq!(String::from(">"), direction_of_neighbour(test_point1, test_point4));
         assert_eq!(String::from("<"), direction_of_neighbour(test_point1, test_point5));
+        assert_eq!(String::from("."), direction_of_neighbour(test_point1, test_point6));
     }
 
     #[test]

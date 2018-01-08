@@ -137,9 +137,12 @@ pub fn main() {
 
     build_debug_grid_walls(&mut example_grid);
 
-    let parents = example_grid.breadth_first_search_2(graph::Point{x: 16, y: 7});
-    // draw_grid(g, width=2, point_to=parents, start=(8, 7))
-    example_grid.draw_grid(2, &parents);
+    // example_grid.draw_grid(2, &parents);
+    let start = graph::Point{x: 8, y: 7};
+    let goal = graph::Point{x: 17, y: 2} ;
+    let parents = example_grid.breadth_first_search_2(start);
+    // let parents = example_grid.breadth_first_search_3(start, goal);
+    example_grid.draw_grid(2, &parents, goal);
 }
 
 fn build_debug_grid_walls(graph: &mut graph::SquareGrid) {
